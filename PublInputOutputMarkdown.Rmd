@@ -1,0 +1,833 @@
+---
+title: "PaperInputOutput"
+output: html_document
+---
+
+```{r,  warning = FALSE, message = FALSE}
+library(ggplot2)
+library(reshape2)
+library(extrafont)
+loadfonts()
+library(plotly)
+library(ggpubr)
+
+plotParameters <- list()
+plotParameters$fontFamilyText <- 'Arial'
+plotParameters$fontFamilyMath <- 'Arial'
+plotParameters$fontSize <- 8
+plotParameters$plotLabelTextSize <- 8
+plotParameters$colorMDCBlue <- '#0061A1'
+plotParameters$colorLightBlue <- '#6495ed'
+plotParameters$colorMDCGreen <- '#63b558'
+```
+
+```{r}
+generatePCRDistributedNumbers <- function(n,probDistribAnalytical){
+  cdfPCRDistribution <- c(0,cumsum(probDistribAnalytical))
+  randomUnifNumbers <- runif(n,min=0,max=1)
+  randomPCRNumber <- rep(0,n)
+  for (i in 1:n){
+    randomPCRNumber[i] <- sum(randomUnifNumbers[i]>=cdfPCRDistribution)
+  }
+  return(randomPCRNumber)
+}
+```
+
+```{r}
+numberOfCycles <- 8
+pcrEfficiency <- 0.8
+numberOfMonteCarloSims <- 10^6
+numberOfStartingTranscripts <- 1
+
+probDistribAnalytical808 <- rep(0, 2^numberOfCycles)
+for (k in 1:(2^numberOfCycles)){
+  sumi10 <- 0
+  for (i10 in max(0, k-2^(numberOfCycles-1)):floor(k/2)){
+    i9<-0
+    i8<-0
+    sumi7 <- 0
+    if (floor((k-i10-i9-i8)/2)>=0){
+      for (i7 in max(0, k-i10-i9-i8-2^(7-1)):floor((k-i10-i9-i8)/2)){
+        sumi6 <- 0
+        if (floor((k-i10-i9-i8-i7)/2)>=0){
+          for (i6 in max(0, k-i10-i9-i8-i7-2^(6-1)):floor((k-i10-i9-i8-i7)/2)){
+            sumi5 <- 0
+            if (floor((k-i10-i9-i8-i7-i6)/2)>=0){
+              for (i5 in max(0, k-i10-i9-i8-i7-i6-2^(5-1)):floor((k-i10-i9-i8-i7-i6)/2)){
+                sumi4 <- 0
+                if (floor((k-i10-i9-i8-i7-i6-i5)/2)>=0){
+                  for (i4 in max(0, k-i10-i9-i8-i7-i6-i5-2^(4-1)):floor((k-i10-i9-i8-i7-i6-i5)/2)){
+                    sumi3 <- 0
+                    if (floor((k-i10-i9-i8-i7-i6-i5-i4)/2)>=0){
+                      for (i3 in max(0, k-i10-i9-i8-i7-i6-i5-i4-2^(3-1)):floor((k-i10-i9-i8-i7-i6-i5-i4)/2)){
+                        sumi2 <- 0
+                        if (floor((k-i10-i9-i8-i7-i6-i5-i4-i3)/2)>=0){
+                          for (i2 in max(0, k-i10-i9-i8-i7-i6-i5-i4-i3-2^(2-1)):floor((k-i10-i9-i8-i7-i6-i5-i4-i3)/2)){
+                            sumi2 <- sumi2 + choose(k-i10,i10)*choose(k-i10-i9,i9)*choose(k-i10-i9-i8,i8)*choose(k-i10-i9-i8-i7,i7)*choose(k-i10-i9-i8-i7-i6,i6)*choose(k-i10-i9-i8-i7-i6-i5,i5)*choose(k-i10-i9-i8-i7-i6-i5-i4,i4)*choose(k-i10-i9-i8-i7-i6-i5-i4-i3,i3)*choose(k-i10-i9-i8-i7-i6-i5-i4-i3-i2,i2)*(1-pcrEfficiency)^((numberOfCycles-2)*k+2-((numberOfCycles-1)*i10+8*i9+7*i8+6*i7+5*i6+4*i5+3*i4+2*i3+i2))
+                          }
+                        }
+                        sumi3 <- sumi3+sumi2
+                      }
+                    }
+                    sumi4 <- sumi4+sumi3
+                  }
+                }
+                sumi5 <- sumi5+sumi4
+              }
+            }
+            sumi6 <- sumi6+sumi5
+          }
+        }
+        sumi7 <- sumi7+sumi6
+      }
+    }
+    sumi10 <- sumi10+sumi7
+  }
+  probDistribAnalytical808[k] <- pcrEfficiency^(k-1)*sumi10
+}
+
+simulationResult808 <- rep(0,numberOfMonteCarloSims)
+for (k in 1:numberOfMonteCarloSims){
+  numberOfTranscripts <- numberOfStartingTranscripts
+  
+  for (i in 1:numberOfCycles){
+    successThisCycle <- runif(numberOfTranscripts, min = 0, max = 1)
+    successThisCycle <- successThisCycle<=pcrEfficiency
+    numberOfTranscripts <- numberOfTranscripts+sum(successThisCycle)
+  }
+  simulationResult808[k] <- numberOfTranscripts
+}
+```
+
+```{r}
+numberOfCycles <- 8
+pcrEfficiency <- 0.95
+numberOfMonteCarloSims <- 10^6
+numberOfStartingTranscripts <- 1
+
+probDistribAnalytical8095 <- rep(0, 2^numberOfCycles)
+for (k in 1:(2^numberOfCycles)){
+  sumi10 <- 0
+  for (i10 in max(0, k-2^(numberOfCycles-1)):floor(k/2)){
+    i9<-0
+    i8<-0
+    sumi7 <- 0
+    if (floor((k-i10-i9-i8)/2)>=0){
+      for (i7 in max(0, k-i10-i9-i8-2^(7-1)):floor((k-i10-i9-i8)/2)){
+        sumi6 <- 0
+        if (floor((k-i10-i9-i8-i7)/2)>=0){
+          for (i6 in max(0, k-i10-i9-i8-i7-2^(6-1)):floor((k-i10-i9-i8-i7)/2)){
+            sumi5 <- 0
+            if (floor((k-i10-i9-i8-i7-i6)/2)>=0){
+              for (i5 in max(0, k-i10-i9-i8-i7-i6-2^(5-1)):floor((k-i10-i9-i8-i7-i6)/2)){
+                sumi4 <- 0
+                if (floor((k-i10-i9-i8-i7-i6-i5)/2)>=0){
+                  for (i4 in max(0, k-i10-i9-i8-i7-i6-i5-2^(4-1)):floor((k-i10-i9-i8-i7-i6-i5)/2)){
+                    sumi3 <- 0
+                    if (floor((k-i10-i9-i8-i7-i6-i5-i4)/2)>=0){
+                      for (i3 in max(0, k-i10-i9-i8-i7-i6-i5-i4-2^(3-1)):floor((k-i10-i9-i8-i7-i6-i5-i4)/2)){
+                        sumi2 <- 0
+                        if (floor((k-i10-i9-i8-i7-i6-i5-i4-i3)/2)>=0){
+                          for (i2 in max(0, k-i10-i9-i8-i7-i6-i5-i4-i3-2^(2-1)):floor((k-i10-i9-i8-i7-i6-i5-i4-i3)/2)){
+                            sumi2 <- sumi2 + choose(k-i10,i10)*choose(k-i10-i9,i9)*choose(k-i10-i9-i8,i8)*choose(k-i10-i9-i8-i7,i7)*choose(k-i10-i9-i8-i7-i6,i6)*choose(k-i10-i9-i8-i7-i6-i5,i5)*choose(k-i10-i9-i8-i7-i6-i5-i4,i4)*choose(k-i10-i9-i8-i7-i6-i5-i4-i3,i3)*choose(k-i10-i9-i8-i7-i6-i5-i4-i3-i2,i2)*(1-pcrEfficiency)^((numberOfCycles-2)*k+2-((numberOfCycles-1)*i10+8*i9+7*i8+6*i7+5*i6+4*i5+3*i4+2*i3+i2))
+                          }
+                        }
+                        sumi3 <- sumi3+sumi2
+                      }
+                    }
+                    sumi4 <- sumi4+sumi3
+                  }
+                }
+                sumi5 <- sumi5+sumi4
+              }
+            }
+            sumi6 <- sumi6+sumi5
+          }
+        }
+        sumi7 <- sumi7+sumi6
+      }
+    }
+    sumi10 <- sumi10+sumi7
+  }
+  probDistribAnalytical8095[k] <- pcrEfficiency^(k-1)*sumi10
+}
+
+simulationResult8095 <- rep(0,numberOfMonteCarloSims)
+for (k in 1:numberOfMonteCarloSims){
+  numberOfTranscripts <- numberOfStartingTranscripts
+  
+  for (i in 1:numberOfCycles){
+    successThisCycle <- runif(numberOfTranscripts, min = 0, max = 1)
+    successThisCycle <- successThisCycle<=pcrEfficiency
+    numberOfTranscripts <- numberOfTranscripts+sum(successThisCycle)
+  }
+  simulationResult8095[k] <- numberOfTranscripts
+}
+```
+
+```{r}
+numberOfCycles <- 8
+pcrEfficiency <- 0.99
+numberOfMonteCarloSims <- 10^6
+numberOfStartingTranscripts <- 1
+
+probDistribAnalytical8099 <- rep(0, 2^numberOfCycles)
+for (k in 1:(2^numberOfCycles)){
+  sumi10 <- 0
+  for (i10 in max(0, k-2^(numberOfCycles-1)):floor(k/2)){
+    i9<-0
+    i8<-0
+    sumi7 <- 0
+    if (floor((k-i10-i9-i8)/2)>=0){
+      for (i7 in max(0, k-i10-i9-i8-2^(7-1)):floor((k-i10-i9-i8)/2)){
+        sumi6 <- 0
+        if (floor((k-i10-i9-i8-i7)/2)>=0){
+          for (i6 in max(0, k-i10-i9-i8-i7-2^(6-1)):floor((k-i10-i9-i8-i7)/2)){
+            sumi5 <- 0
+            if (floor((k-i10-i9-i8-i7-i6)/2)>=0){
+              for (i5 in max(0, k-i10-i9-i8-i7-i6-2^(5-1)):floor((k-i10-i9-i8-i7-i6)/2)){
+                sumi4 <- 0
+                if (floor((k-i10-i9-i8-i7-i6-i5)/2)>=0){
+                  for (i4 in max(0, k-i10-i9-i8-i7-i6-i5-2^(4-1)):floor((k-i10-i9-i8-i7-i6-i5)/2)){
+                    sumi3 <- 0
+                    if (floor((k-i10-i9-i8-i7-i6-i5-i4)/2)>=0){
+                      for (i3 in max(0, k-i10-i9-i8-i7-i6-i5-i4-2^(3-1)):floor((k-i10-i9-i8-i7-i6-i5-i4)/2)){
+                        sumi2 <- 0
+                        if (floor((k-i10-i9-i8-i7-i6-i5-i4-i3)/2)>=0){
+                          for (i2 in max(0, k-i10-i9-i8-i7-i6-i5-i4-i3-2^(2-1)):floor((k-i10-i9-i8-i7-i6-i5-i4-i3)/2)){
+                            sumi2 <- sumi2 + choose(k-i10,i10)*choose(k-i10-i9,i9)*choose(k-i10-i9-i8,i8)*choose(k-i10-i9-i8-i7,i7)*choose(k-i10-i9-i8-i7-i6,i6)*choose(k-i10-i9-i8-i7-i6-i5,i5)*choose(k-i10-i9-i8-i7-i6-i5-i4,i4)*choose(k-i10-i9-i8-i7-i6-i5-i4-i3,i3)*choose(k-i10-i9-i8-i7-i6-i5-i4-i3-i2,i2)*(1-pcrEfficiency)^((numberOfCycles-2)*k+2-((numberOfCycles-1)*i10+8*i9+7*i8+6*i7+5*i6+4*i5+3*i4+2*i3+i2))
+                          }
+                        }
+                        sumi3 <- sumi3+sumi2
+                      }
+                    }
+                    sumi4 <- sumi4+sumi3
+                  }
+                }
+                sumi5 <- sumi5+sumi4
+              }
+            }
+            sumi6 <- sumi6+sumi5
+          }
+        }
+        sumi7 <- sumi7+sumi6
+      }
+    }
+    sumi10 <- sumi10+sumi7
+  }
+  probDistribAnalytical8099[k] <- pcrEfficiency^(k-1)*sumi10
+}
+
+simulationResult8099 <- rep(0,numberOfMonteCarloSims)
+for (k in 1:numberOfMonteCarloSims){
+  numberOfTranscripts <- numberOfStartingTranscripts
+  
+  for (i in 1:numberOfCycles){
+    successThisCycle <- runif(numberOfTranscripts, min = 0, max = 1)
+    successThisCycle <- successThisCycle<=pcrEfficiency
+    numberOfTranscripts <- numberOfTranscripts+sum(successThisCycle)
+  }
+  simulationResult8099[k] <- numberOfTranscripts
+}
+```
+
+```{r}
+numberOfCycles <- 16
+pcrEfficiency <- 0.95
+numberOfMonteCarloSims <- 10^6
+numberOfStartingTranscripts <- 1
+
+probDistribAnalyticalList <- list()
+probDistribAnalyticalList$`8` <- probDistribAnalytical8095
+for (i in 9:16){
+  for (j in 1:(2^i)){
+    sumThisLoop <- 0
+    for (k in ceiling(j/2):min(j,2^(i-1))){
+      sumThisLoop <- sumThisLoop + dbinom(j-k,k,pcrEfficiency)*probDistribAnalyticalList[[as.character(i-1)]][k]
+    }
+    probDistribAnalyticalList[[as.character(i)]][j] <- sumThisLoop
+  }
+}
+
+probDistribAnalytical16095 <- probDistribAnalyticalList$`16`
+
+simulationResult16095 <- rep(0,numberOfMonteCarloSims)
+for (k in 1:numberOfMonteCarloSims){
+  numberOfTranscripts <- numberOfStartingTranscripts
+  
+  for (i in 1:numberOfCycles){
+    successThisCycle <- runif(numberOfTranscripts, min = 0, max = 1)
+    successThisCycle <- successThisCycle<=pcrEfficiency
+    numberOfTranscripts <- numberOfTranscripts+sum(successThisCycle)
+  }
+  simulationResult16095[k] <- numberOfTranscripts
+}
+```
+
+```{r}
+numberOfCycles <- 8
+pcrEfficiency <- 0.8
+numberOfMonteCarloSims <- 10^6
+numberOfStartingTranscripts <- 1
+
+simulationResultCurrent <- simulationResult808
+
+ggplot()+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_bar(data = data.frame(x=simulationResultCurrent), aes(x=x, y = (..count..)/sum(..count..), fill = 'grey'))+
+  expand_limits(x=2^numberOfCycles)+
+  geom_line(data = data.frame(x=1:length(probDistribAnalytical808), y = probDistribAnalytical808), aes(x=x, y=y, color = 'black'), lwd = 0.3)+
+  scale_x_continuous(breaks = c(0, 64, 128, 192, 256))+
+  scale_y_continuous(breaks = c(0, 0.005, 0.01))+
+  scale_color_manual(name = 'analyticalFunction', labels = c('pdf'), values = c('black'))+
+  scale_fill_manual(name = 'histogram', labels = c('simulation'), values = c('grey'))+
+  xlab(paste('# copies after ', numberOfCycles, ' cycles', sep = ''))+
+  ylab('probability')+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.35,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))
+```
+
+```{r}
+numberOfCycles <- 8
+pcrEfficiency <- 0.95
+numberOfMonteCarloSims <- 10^6
+numberOfStartingTranscripts <- 1
+
+simulationResultCurrent <- simulationResult8095
+
+ggplot()+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_bar(data = data.frame(x=simulationResultCurrent), aes(x=x, y = (..count..)/sum(..count..), fill = 'grey'))+
+  expand_limits(x=2^numberOfCycles)+
+  geom_line(data = data.frame(x=1:length(probDistribAnalyticalList[[as.character(numberOfCycles)]]), y = probDistribAnalyticalList[[as.character(numberOfCycles)]]), aes(x=x, y=y, color = 'black'), lwd = 0.3)+
+  scale_x_continuous(breaks = c(0, 64, 128, 192, 256))+
+  scale_y_continuous(breaks = c(0, 0.01, 0.02))+
+  scale_color_manual(name = 'analyticalFunction', labels = c('pdf'), values = c('black'))+
+  scale_fill_manual(name = 'histogram', labels = c('simulation'), values = c('grey'))+
+  xlab(paste('# copies after ', numberOfCycles, ' cycles', sep = ''))+
+  ylab('probability')+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.35,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))
+
+```
+
+
+```{r}
+numberOfCycles <- 8
+pcrEfficiency <- 0.99
+numberOfMonteCarloSims <- 10^6
+numberOfStartingTranscripts <- 1
+
+simulationResultCurrent <- simulationResult8099
+
+ggplot()+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_bar(data = data.frame(x=simulationResultCurrent), aes(x=x, y = (..count..)/sum(..count..), fill = 'grey'))+
+  expand_limits(x=2^numberOfCycles)+
+  geom_line(data = data.frame(x=1:length(probDistribAnalytical8099), y = probDistribAnalytical8099), aes(x=x, y=y, color = 'black'), lwd = 0.3)+
+  scale_x_continuous(breaks = c(0, 64, 128, 192, 256))+
+  scale_y_continuous(breaks = c(0, 0.05, 0.1))+
+  scale_color_manual(name = 'analyticalFunction', labels = c('pdf'), values = c('black'))+
+  scale_fill_manual(name = 'histogram', labels = c('simulation'), values = c('grey'))+
+  xlab(paste('# copies after ', numberOfCycles, ' cycles', sep = ''))+
+  ylab('probability')+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.35,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))
+```
+
+```{r}
+numberOfCycles <- 16
+pcrEfficiency <- 0.95
+numberOfMonteCarloSims <- 10^6
+numberOfStartingTranscripts <- 1
+
+simulationResultCurrent <- simulationResult16095
+
+xValue <- seq(from = 0, to = 2^16, length.out = 2^8+1)
+xValueShifted <- xValue[1:(length(xValue)-1)]+xValue[2]/2
+yHelp <- hist(simulationResultCurrent, breaks = xValue, plot = FALSE)
+yValue <- yHelp$counts/numberOfMonteCarloSims/length(xValue)
+ggplot()+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-2),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_bar(data = data.frame(x=xValueShifted, y = yValue), aes(x=x, y=y, fill = 'grey'), stat='identity')+
+  expand_limits(x=2^numberOfCycles)+
+  geom_line(data = data.frame(x=1:length(probDistribAnalyticalList[[as.character(numberOfCycles)]]), y = probDistribAnalyticalList[[as.character(numberOfCycles)]]), aes(x=x, y=y, color = 'black'), lwd = 0.3)+
+  scale_x_continuous(breaks = c(0, 2^15*0.5, 2^15, 2^15*1.5, 2^16))+
+  scale_y_continuous(breaks = c(0, 5*10^(-5), 10*10^(-5)))+
+  scale_color_manual(name = 'analyticalFunction', labels = c('pdf'), values = c('black'))+
+  scale_fill_manual(name = 'histogram', labels = c('simulation'), values = c('grey'))+
+  xlab(paste('# copies after ', numberOfCycles, ' cycles', sep = ''))+
+  ylab('probability')+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.35,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))
+```
+
+
+```{r}
+lVector <- seq(from=1, to=20, by=1)
+pVector <- seq(from=0.8, to=1, length.out=21)
+gridCV <- expand.grid(lVector,pVector)
+
+CVSensitivityData <- 1/((1+gridCV[,2])^gridCV[,1])
+
+grid3D <- data.frame(x=gridCV[,1], y=gridCV[,2], z=CVSensitivityData)
+
+CVSensitivity <- matrix(CVSensitivityData, nrow = length(lVector), ncol = length(pVector))
+
+f <- list(
+    size = 25,
+    family = 'Tahoma'
+  )
+  m <- list(
+    l = 0,
+    r = 0,
+    b = -50,
+    t = 0,
+    pad = 0
+  )
+plot3DSurface <- plot_ly(width = 800, height = 800, x=~pVector, y=~lVector, z=~CVSensitivity, colorscale = list(c(0, 0.999*0.0025/max(CVSensitivity), 0.0025/max(CVSensitivity), 1), c('white', '#fafdff', '#80a7c2', plotParameters$colorMDCBlue)), showscale = FALSE)%>%add_surface()%>%layout(
+  title='',
+  scene=list(
+    yaxis=list(title='# cycles l', tickfont = list(size = 16, family='Tahoma')),
+    xaxis=list(title='PCR efficiency p', tickfont = list(size = 16, family='Tahoma')),
+    zaxis=list(title='CV convergence factor', tickfont = list(size = 16, family='Tahoma'))
+  ),
+  font = f,
+  margin = m
+)
+plot3DSurface
+```
+
+```{r warning = FALSE, message = FALSE}
+dataToPlot <- readRDS(file = '/Users/Daniel/Studium Doktorarbeit/Publication InputOutputDistribution/MeanVarData.rds')
+nlsFit <- nls(var~mean+1/r*mean^2, dataToPlot, start = list(r=1))
+negBinomParamR <- nlsFit$m$getPars()
+
+x <- seq(from = 10^(-3), to = 2*10^2, length.out = dim(dataToPlot)[1])
+linearFunction <- x
+quadrFunction1 <- x+1/negBinomParamR*x^2
+dataToPlot <- cbind(dataToPlot,
+                xValue = x,
+                linFct = linearFunction,
+                quadrFct1 = quadrFunction1)
+
+ggplot(data = dataToPlot)+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_point(aes(x=mean, y=var), color = 'grey', size = 0.15)+
+  geom_line(aes(x=xValue, y=linFct, linetype = 'dotted'), size = 0.3, color = 'black')+
+  geom_line(aes(x=xValue, y=quadrFct1, linetype = 'dashed'), size = 0.3, color = 'black')+
+  xlab('mean of observed counts per cell')+
+  ylab('variance of observed counts per cell')+
+  scale_linetype_manual(values=c('dotted', 'dashed'), labels = c('negative binomial', 'Poisson'))+
+  scale_x_log10()+
+  scale_y_log10()+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.35,"line"),
+        legend.key.width = unit(0.75, "line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0),
+        legend.text = element_text(margin = margin(r = 15, unit = "pt")))+
+  guides(linetype = guide_legend(override.aes = list(size = 0.2)))
+```
+
+
+```{r}
+dataToUse <- readRDS(file = '/Users/Daniel/Studium Doktorarbeit/Publication InputOutputDistribution/MeanVarData.rds')
+ps <- 0.116
+
+nlsFit2 <- nls(var~(1-ps+ps*a1)*mean+a2*mean^2+a3/ps*mean^3, dataToUse, start = list(a1=4,a2=0.5,a3=10^(-3)))
+dataToUse$fit <- predict(nlsFit2)
+
+nlsFit <- nls(var~mean+1/r*mean^2, dataToPlot, start = list(r=1))
+negBinomParamR <- nlsFit$m$getPars()
+
+x <- seq(from = 10^(-3), to = 2*10^2, length.out = dim(dataToUse)[1])
+linearFunction <- x
+quadrFunction1 <- x+1/negBinomParamR*x^2
+dataToPlot <- cbind(dataToUse,
+                xValue = x,
+                linFct = linearFunction,
+                quadrFct1 = quadrFunction1)
+
+ggplot(data = dataToPlot)+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_point(aes(x=mean, y=var), color = 'grey', size = 0.15)+
+  geom_line(aes(x=mean, y=fit, linetype = 'solid'), size = 0.3, color = 'black')+
+  xlab('mean of observed counts per cell')+
+  ylab('variance of observed counts per cell')+
+  scale_linetype_manual(values=c('solid'), labels = c('polynomial fit'))+
+  scale_x_log10()+
+  scale_y_log10()+
+  expand_limits(y=10^4)+
+  annotate("text", label = as.expression(bquote(with~Var(X["in"])~"="~.(format(round(nlsFit2$m$getPars()[1],2),nsmall=2))~E(X["in"])~+~.(format(round(nlsFit2$m$getPars()[2],2),nsmall=2))~E(X["in"])^2~-~.(format(round(abs(nlsFit2$m$getPars()[3]*10^5),2),nsmall=2))~"*"~10^-5~E(X["in"])^3)), x = min(dataToPlot$mean), y = max(dataToPlot$var), size = 2, hjust=0)+
+  annotate("text", label = as.expression(bquote(and~p[s]~"="~.(ps))), x = min(dataToPlot$mean), y = 0.2*max(dataToPlot$var), size = 2, hjust=0)+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.35,"line"),
+        legend.key.width = unit(0.75, "line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0),
+        legend.text = element_text(margin = margin(r = 15, unit = "pt")))+
+  guides(linetype = guide_legend(override.aes = list(size = 0.15)))
+```
+
+
+```{r}
+pcrEfficiency <- 0.95
+numberOfCycles <- 8
+probDistribAnalytical <- probDistribAnalyticalList$`8`
+pHat <- -log(1-0.116)/(1+pcrEfficiency)^numberOfCycles
+probDistribSuccess <- sum(probDistribAnalytical*(1-exp(-(1:(2^numberOfCycles)*pHat))))
+numberOfMonteCarloSims2 <- 10^5
+
+targetMean <- 6
+targetSD <- 3
+sdLNorm <- sqrt(log((targetSD/targetMean)^2+1))
+meanLNorm <- log(targetMean)-1/2*sdLNorm^2
+numberOfTrueMolecules <- floor(rlnorm(numberOfMonteCarloSims2, mean = meanLNorm, sd = sdLNorm))
+numberOfTrueMolecules[numberOfTrueMolecules<=0] <- 1
+
+observedCounts <- rep(0, numberOfMonteCarloSims2)
+for (i in 1:numberOfMonteCarloSims2){
+  probDistribZ <- 1-exp(-generatePCRDistributedNumbers(numberOfTrueMolecules[i],probDistribAnalytical)*pHat)
+  randomNumberVector <- runif(length(probDistribZ), min=0, max = 1)
+  decisionVector <- randomNumberVector<=probDistribZ
+  observedCounts[i] <- sum(decisionVector)
+}
+
+
+count = observedCounts
+n=length(count)
+hist=hist(count,breaks=seq(-0.5,max(count)+0.5,1), plot = FALSE)
+
+theta=c(mu=1)
+pois_negLL=function(theta)
+{
+  -sum(dpois(count,theta[1],log=T))
+}
+fitPoisson=optimize(pois_negLL,lower=0,upper=max(count))
+
+theta2=c(mu=1,k=1)
+NB_negLL=function(theta2)
+	{
+	-sum(dnbinom(count,mu=theta2[1],size=theta2[2],log=T))
+	}
+fitNegBinom=optim(theta2,NB_negLL)
+
+distribOutput <- rep(0,ceiling(max(numberOfTrueMolecules)*1.1))
+if (sdLNorm>0){
+  for (j in 0:(length(distribOutput)-1)){
+    sumLoop <- 0
+    for (i in j:(length(distribOutput)-1)){
+      sumLoop <- sumLoop + dlnorm(i, mean = meanLNorm, sd = sdLNorm)*dbinom(j,i,probDistribSuccess)
+    }
+    distribOutput[j+1] <- sumLoop
+  }
+}
+
+xValue <- seq(from = -0.5, to = max(observedCounts)+0.5, by = 1)
+xValueShifted <- xValue[1:(length(xValue)-1)]+xValue[2]
+yHelp <- hist(observedCounts, breaks = xValue, plot = FALSE)
+yValue <- yHelp$counts/length(observedCounts)
+dataToPlot <- data.frame(x=seq(0,max(hist$breaks)-0.5),
+                         yPois=dpois(seq(0,max(hist$breaks)-0.5),fitPoisson$minimum),
+                         yNBinom=dnbinom(seq(0,max(hist$breaks)-0.5),mu=fitNegBinom$par[1],size=fitNegBinom$par[2]),
+                         yTrueOutput=distribOutput[1:(max(hist$breaks)+0.5)])
+dataToPlotMelted <- melt(dataToPlot, id='x')
+colorPalette2Colors <- c('#6495ed', '#d9534f')
+colorPaletteCellCyclePhasesGeneral <- c('#ac4343', '#466caf', '#df8b3f', '#63b558', '#e8d760', '#61c5c7', '#f04ddf', '#a555d4')
+plotLabelTextSize <- 8
+
+ggplot()+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_bar(data = data.frame(x=xValueShifted, y = yValue), aes(x=x, y=y), fill = 'grey', stat='identity',alpha = 0.4)+
+  geom_line(data = dataToPlotMelted, aes(x=x,y=value,linetype=variable), lwd = 0.15, alpha = 1)+
+  xlab('observed counts')+
+  ylab('frequency')+
+  scale_linetype_manual(values = c('dashed', 'dotted', 'solid'), labels = c('Poisson','neg. Binom.', 'analytical'))+
+  scale_y_continuous(breaks=seq(from=0,to=0.6,by=0.2))+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.35,"line"),
+        legend.key.width = unit(0.75, "line"),
+        legend.box.margin = margin(-5,10,0,0),
+        legend.margin = margin(0,0,0,0),
+        legend.text = element_text(margin = margin(r = 5, unit = "pt")))+
+  guides(linetype = guide_legend(override.aes = list(size = 0.15)))+
+  annotate('text', label = as.expression(bquote(E(X["in"])~"="~.(format(round(targetMean,0),nsmall=0)))), x=max(observedCounts), y=max(max(yValue),max(dataToPlotMelted[,'value']))*1, hjust=1, size=2.5)+
+  annotate('text', label = as.expression(bquote(SD(X["in"])~"="~.(format(round(targetSD,0),nsmall=0)))), x=max(observedCounts), y=max(max(yValue),max(dataToPlotMelted[,'value']))*0.82, hjust=1, size=2.5)+
+  annotate('text', label = as.expression(bquote(CV(X["in"])~"="~.(format(round(targetSD/targetMean,2),nsmall=2)))), x=max(observedCounts), y=max(max(yValue),max(dataToPlotMelted[,'value']))*0.64, hjust=1, size=2.5)
+
+```
+
+```{r}
+xValue <- seq(from = -0.5, to = max(observedCounts)+0.5, by = 1)
+xValueShifted <- xValue[1:(length(xValue)-1)]+xValue[2]
+yHelp <- hist(observedCounts, breaks = xValue, plot = FALSE)
+yValue <- yHelp$counts/length(observedCounts)
+
+xValueTrue <- seq(from = -0.5, to = max(observedCounts)+0.5, by = 1)
+xValueTrueShifted <- xValueTrue[1:(length(xValueTrue)-1)]+xValueTrue[2]
+yHelpTrue <- hist(numberOfTrueMolecules*probDistribSuccess, breaks = xValueTrue, plot = FALSE)
+yValueTrue <- yHelpTrue$counts/length(numberOfTrueMolecules)
+
+colorPalette2Colors <- c('#6495ed', '#d9534f')
+colorPaletteCellCyclePhasesGeneral <- c('#ac4343', '#466caf', '#df8b3f', '#63b558', '#e8d760', '#61c5c7', '#f04ddf', '#a555d4')
+plotLabelTextSize <- 8
+
+ggplot()+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_bar(data = data.frame(x=xValueShifted, y = yValue, fill=rep('1',length(xValueShifted))), aes(x=x, y=y, fill = fill), stat='identity',alpha = 0.4)+
+  geom_bar(data = data.frame(x=xValueTrueShifted, y = yValueTrue, fill=rep('2',length(xValueTrueShifted))), aes(x=x, y=y, fill = fill), stat='identity',alpha = 0.4)+
+  xlab('observed counts')+
+  ylab('frequency')+
+  scale_y_continuous(breaks=c(0,0.2,0.4,0.6))+
+  scale_fill_manual(values = c(colorPalette2Colors[1], colorPalette2Colors[2]), labels=c('output', expression(input~'*'~p[s])))+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.4,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))+
+  guides(fill = guide_legend(override.aes = list(size = 0.4)))+
+  annotate('text', label = as.expression(bquote(E(X["in"])~"="~.(format(round(targetMean,0),nsmall=0)))), x=max(observedCounts), y=max(max(yValue),max(yValueTrue))*1, hjust=1, size=2.5)+
+  annotate('text', label = as.expression(bquote(SD(X["in"])~"="~.(format(round(targetSD,0),nsmall=0)))), x=max(observedCounts), y=max(max(yValue),max(yValueTrue))*0.82, hjust=1, size=2.5)+
+  annotate('text', label = as.expression(bquote(CV(X["in"])~"="~.(format(round(targetSD/targetMean,2),nsmall=2)))), x=max(observedCounts), y=max(max(yValue),max(yValueTrue))*0.64, hjust=1, size=2.5)
+```
+
+
+```{r}
+expInput <- 300   #3000
+cvInput <- seq(from = 0.02, to = 1, length.out=1000)
+psFixed <- 0.116 #probDistribSuccess
+
+cvOutput <- sqrt((1-psFixed)/(psFixed*expInput)+cvInput^2)
+
+dataToPlot <- data.frame(x=cvInput,
+                         y=cvOutput)
+ggplot(data=dataToPlot)+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_line(aes(x=x,y=y), color = 'black', lwd = 0.35)+
+  annotate('text', label=as.expression(bquote("for"~p[s]~"="~.(psFixed))),x=max(cvInput),y=psFixed,hjust=1, size = 2.5)+
+  xlab('CV of input distribution')+
+  ylab('CV of\noutput distribution')+
+  expand_limits(x=0,y=0)+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.7,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))
+
+dataToPlot <- data.frame(x=cvInput,
+                         y=cvOutput/cvInput)
+ggplot(data=dataToPlot)+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_line(aes(x=x,y=y), color = 'black', lwd = 0.35)+
+  annotate('text', label=as.expression(bquote("for"~p[s]~"="~.(psFixed))),x=max(cvInput),y=max(cvOutput/cvInput),hjust=1, size = 2.5)+
+  xlab('CV of input distribution')+
+  ylab('fold change of\nCV output to CV input')+
+  expand_limits(x=0,y=0)+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.7,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))
+
+expInput <- 50
+cvInput <- 0.2 #0.4
+ps <- seq(from=0.03, to = 0.999, length.out = 1000) #probDistribSuccess
+
+cvOutput <- sqrt((1-ps)/(ps*expInput)+cvInput^2)
+
+dataToPlot <- data.frame(x=ps,
+                         y=cvOutput)
+ggplot(data=dataToPlot)+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_line(aes(x=x,y=y), color = 'black', lwd = 0.35)+
+  geom_vline(xintercept=psFixed, lwd = 0.1, linetype = 'dashed')+
+  annotate('text', label=as.expression(bquote(p[s]~"="~.(psFixed))),x=psFixed+0.02,y=max(cvOutput)*0.8,hjust=0, size = 2.5)+
+  annotate('text', label=as.expression(bquote("for"~CV(X["in"])~"="~.(cvInput))),x=1,y=max(cvOutput),hjust=1, size = 2.5)+
+  #geom_text(data=data.frame(text=paste('for CV(X_in)=', cvInput, sep = '')),aes(x=1,y=max(cvOutput),label=text), hjust=1, size = 2.5)+
+  xlab(expression(sequencing~depth~p[s]))+
+  ylab('CV of\noutput distribution')+
+  expand_limits(x=0,y=0)+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.7,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))
+
+
+dataToPlot <- data.frame(x=ps,
+                         y=cvOutput/cvInput)
+ggplot(data=dataToPlot)+
+  theme_light(base_size = plotParameters$plotLabelTextSize)+
+  theme(text=element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        axis.text = element_text(family=plotParameters$fontFamilyMath, size=plotParameters$fontSize-1),
+        axis.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize),
+        legend.text = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize-1),
+        legend.title = element_text(family=plotParameters$fontFamilyText, size=plotParameters$fontSize))+
+  geom_line(aes(x=x,y=y), color = 'black', lwd = 0.35)+
+  geom_vline(xintercept=psFixed, lwd = 0.1, linetype = 'dashed')+
+  annotate('text', label=as.expression(bquote(p[s]~"="~.(psFixed))),x=psFixed+0.02,y=max(cvOutput/cvInput)*0.8,hjust=0, size = 2.5)+
+  annotate('text', label=as.expression(bquote("for"~CV(X["in"])~"="~.(cvInput))),x=1,y=max(cvOutput/cvInput),hjust=1, size = 2.5)+
+  xlab(expression(sequencing~depth~p[s]))+
+  ylab('fold change of\nCV output to CV input')+
+  expand_limits(x=0,y=0)+
+  #scale_y_continuous(breaks=seq(from=0,to=12,by=2))+
+  theme(legend.position = 'bottom',
+        axis.text.y=element_text(angle=90, hjust=0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.7,"line"),
+        legend.box.margin = margin(-5,0,0,0),
+        legend.margin = margin(0,0,0,0))
+```
+
+```{r}
+expInput <- 300
+psVector <- seq(from=0.005, to = 0.997, length.out = 1000-1)
+cvInputVector <- seq(from = 0.001, to = 0.997, length.out=1000-1)
+gridOutputCV <- expand.grid(psVector,cvInputVector)
+
+outputCV <- sqrt((1-gridOutputCV[,1])/(gridOutputCV[,1]*expInput)+gridOutputCV[,2]^2)
+
+outputCVMatrix <- matrix(outputCV, nrow = length(psVector), ncol = length(cvInputVector))
+
+f <- list(
+    size = 25,
+    family = 'Tahoma'
+  )
+  m <- list(
+    l = 0,
+    r = 0,
+    b = -50,
+    t = 0,
+    pad = 0
+  )
+plot3DSurface <- plot_ly(width = 1000, height = 1000, y=~psVector, x=~cvInputVector, z=~outputCVMatrix, colorscale = list(c(0, 1), c('#def1fc', plotParameters$colorMDCBlue)), showscale = FALSE)%>%add_surface()%>%layout(
+  title='',
+  scene=list(
+    yaxis=list(title='sequencing depth p<sub>s</sub>', tickfont = list(size = 16, family='Tahoma'), rangemode = "tozero"),
+    xaxis=list(title='CV of input', tickfont = list(size = 16, family='Tahoma'), rangemode = "tozero"),
+    zaxis=list(title='CV of output', tickfont = list(size = 16, family='Tahoma'), rangemode = "tozero"),
+    camera=list(eye = list(x = 0.55, y = 1.5, z = 1.5))
+  ),
+  font = f,
+  margin = m
+)
+plot3DSurface
+```
+
+```{r}
+expInput <- 300
+psVector <- seq(from=0.005, to = 0.997, length.out = 1000-1)
+cvInputVector <- seq(from = 0.001, to = 0.997, length.out=1000-1)
+gridOutputCVFC <- expand.grid(psVector,cvInputVector)
+
+outputCVFC <- sqrt((1-gridOutputCVFC[,1])/(gridOutputCVFC[,1]*expInput)+gridOutputCVFC[,2]^2)/gridOutputCVFC[,2]
+
+outputCVMatrix <- matrix(outputCVFC, nrow = length(psVector), ncol = length(cvInputVector))
+
+f <- list(
+    size = 25,
+    family = 'Tahoma'
+  )
+  m <- list(
+    l = 0,
+    r = 0,
+    b = 0,
+    t = 0
+  )
+plot3DSurface <- plot_ly(width = 1000, height = 900, y=~psVector, x=~cvInputVector, z=~outputCVMatrix, colorscale = list(c(0, 1), c('#def1fc', plotParameters$colorMDCBlue)), showscale = FALSE)%>%add_surface()%>%layout(
+  title='',
+  scene=list(
+    yaxis=list(title='sequencing depth p<sub>s</sub>', tickfont = list(size = 16, family='Tahoma'), rangemode = "tozero"),
+    xaxis=list(title='CV of input', tickfont = list(size = 16, family='Tahoma'), rangemode = "tozero"),
+    zaxis=list(title='fold change of output CV', tickfont = list(size = 16, family='Tahoma'), rangemode = "tozero"),
+    camera=list(eye = list(x = -1.55, y = -1.55, z = .75))
+  ),
+  font = f,
+  margin = list(t=0)
+)
+plot3DSurface
+```
+
+
