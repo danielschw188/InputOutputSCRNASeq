@@ -1,7 +1,7 @@
 # Markdown for Publication "On the relation between input and output distributions of scRNA-seq experiments"
 
 ## General
-This is the markdown file used to generate the figures that are shown in the corresponding publication. The data taken from Schwabe et al., 2020 are contained in 'MeanVarData.rds'. The link to this file has to be properly updated in the markdown file before the corresponding section will run.
+The file 'PublInputOutputMarkdown.rmd' is the markdown file used to generate the figures that are shown in the corresponding publication. The data taken from Schwabe et al., 2020 are contained in 'MeanVarData.rds'. The link to this file has to be properly updated in the markdown file before the corresponding section will run.
 
 Some calculations are very time consuming such as the generation of the PCR distribution.
 
